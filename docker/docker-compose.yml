@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  nuxt-app:
+    build: .
+    ports:
+      - "80:3000"
+      - "24678:24678"
+    volumes:
+      - ../:/app
+    command: >
+      sh -c "
+        if [ ! -d node_modules ]; then
+          npx nuxi init . --package-manager npm --force --no-telemetry --git-init=false
+          npx nuxi module add hub
+          npm install --save-dev wrangler
+          npm install firebase
+          npx nuxi@latest module add vuefire
+          npm i pinia @pinia/nuxt
+          npx nuxi@latest module add tailwindcss
+        fi;
+        npm run dev -- --host
+      "
