@@ -1,5 +1,6 @@
 node_modules
 .nuxt
+.vercel
 dist
 
 .env

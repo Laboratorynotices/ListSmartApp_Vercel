@@ -11,8 +11,7 @@ services:
       sh -c "
         if [ ! -d node_modules ]; then
           npx nuxi init . --package-manager npm --force --no-telemetry --git-init=false
-          npx nuxi module add hub
-          npm install --save-dev wrangler
+          npm install -g vercel
           npm install firebase
           npx nuxi@latest module add vuefire
           npm i pinia @pinia/nuxt
