@@ -13,10 +13,10 @@ export default defineNuxtConfig({
     },
     config: {
       // Настройки для Firebase
-      apiKey: String(process.env.GOOGLE_FIREBASE_API_KEY),
-      authDomain: String(process.env.GOOGLE_FIREBASE_AUTH_DOMAIN),
-      projectId: String(process.env.GOOGLE_FIREBASE_PROJECT_ID),
-      appId: String(process.env.GOOGLE_FIREBASE_CONFIG_APP_ID),
+      apiKey: process.env.NUXT_PUBLIC_GOOGLE_FIREBASE_CONFIG_API_KEY,
+      authDomain: process.env.NUXT_PUBLIC_GOOGLE_FIREBASE_CONFIG_AUTH_DOMAIN,
+      projectId: process.env.NUXT_PUBLIC_GOOGLE_FIREBASE_CONFIG_PROJECT_ID,
+      appId: process.env.NUXT_PUBLIC_GOOGLE_FIREBASE_CONFIG_APP_ID,
     },
   },
 });
