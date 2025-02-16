@@ -1,5 +1,7 @@
 <template>
-  <h1>Hallo</h1>
+  <template>
+    <ShoppingList />
+  </template>
 </template>
 
 <script setup lang="ts">
