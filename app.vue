@@ -52,8 +52,11 @@ const logoutAuth = () => {
       <li>
         <nuxt-link to="/info">Информация</nuxt-link>
       </li>
-      <li>
+      <li v-if="!user">
         <nuxt-link to="/login">Вход</nuxt-link>
+      </li>
+      <li>
+        <nuxt-link to="/shoppingListCSR">Список покупок (CSR)</nuxt-link>
       </li>
     </ul>
   </div>
