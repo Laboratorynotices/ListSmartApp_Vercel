@@ -21,8 +21,13 @@ console.log(shoppingStore.items);
 
 // Функция для выхода из системы
 const logoutAuth = () => {
+  // Выходим из системы
   auth?.signOut();
   // Альтернатива signOut(auth) из "firebase/auth"
+
+  const router = useRouter();
+  // Перенаправляем пользователя на главную страницу
+  router.push("/");
 };
 </script>
 
