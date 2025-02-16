@@ -1,7 +1,5 @@
 <template>
-  <template>
-    <ShoppingList />
-  </template>
+  <ShoppingList />
 </template>
 
 <script setup lang="ts">
