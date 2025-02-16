@@ -9,6 +9,11 @@
 <script setup lang="ts">
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
+// Закрыт доступ неавторизованным пользователям
+definePageMeta({
+  middleware: ["auth"],
+});
+
 // @TODO перенести в хелпер
 const auth = useFirebaseAuth();
 
