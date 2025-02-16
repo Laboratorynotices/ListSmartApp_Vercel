@@ -3,25 +3,10 @@
 </template>
 
 <script setup lang="ts">
-import { useShoppingStore } from "@/stores/useShoppingStore";
-
-// Закрыт доступ неавторизованным пользователям
 definePageMeta({
+  // Закрыт доступ неавторизованным пользователям
   middleware: ["auth"],
+  // Задаем имя страницы, для маршрутизации
+  name: "ShoppingListCSR",
 });
-
-// Получаем доступ к хранилищу
-const shoppingStore = useShoppingStore();
-
-// Тест
-// Добавляем товар
-shoppingStore.addItem({
-  name: "Молоко",
-  quantity: 1,
-  completed: false,
-  category: "Продукты",
-});
-
-// Проверим содержимое
-console.log(shoppingStore.items);
 </script>
