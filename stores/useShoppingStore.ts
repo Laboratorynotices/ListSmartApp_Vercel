@@ -53,6 +53,8 @@ const storeHelpers = {
       // В первый раз ещё и создаст "коллекцию"
       return await addDoc(
         // авторизация и указание на "коллекцию"
+        // Указывая ID пользователя в пути позволит нам разделить данные между пользователями
+        // Путь к коллекции должен состоять из нечётного количества частей. (users/{uid}/shoppingItems)
         collection(
           db,
           COLLECTION_NAME_PREFIX + user.value?.uid + COLLECTION_NAME_SUFIX
