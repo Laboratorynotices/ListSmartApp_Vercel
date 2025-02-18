@@ -1,4 +1,9 @@
-import { addDoc, collection, type DocumentData } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  type DocumentData,
+} from "firebase/firestore";
 import { useFirestore } from "vuefire";
 import { defineStore } from "pinia";
 
@@ -67,6 +72,34 @@ const storeHelpers = {
       return { id: undefined };
     }
   },
+
+  // Загрузка данных из Firebase
+  async loadDocsFromFirebase(store: ReturnType<typeof useShoppingStore>) {
+    // Получаем доступ к базе данных через VueFire
+    const db = useFirestore();
+
+    // Получаем текущего пользователя
+    const user = useCurrentUser();
+
+    try {
+      // Делаем из полученных данных массив и приводим к формату списка ShoppingItem
+      // В пути указываем ID пользователя, чтобы получить данные только этого пользователя
+      store.items = (
+        await getDocs(
+          collection(
+            db,
+            COLLECTION_NAME_PREFIX + user.value?.uid + COLLECTION_NAME_SUFIX
+          )
+        )
+      ).docs.map((doc) => ({
+        ...(doc.data() as ShoppingItem),
+        id: doc.id,
+      }));
+    } catch (e) {
+      store.error = "Ошибка при загрузке данных";
+      console.error("Ошибка при загрузке из Firebase:", e);
+    }
+  },
 };
 
 // Создаём store с использованием Composition API стиля
@@ -113,7 +146,10 @@ export const useShoppingStore = defineStore("shopping", {
     // @TODO Обновление существующего элемента
     // @TODO Переключение статуса выполнения
     // @TODO Добавление новой категории
-    // @TODO Загрузка данных из Firebase
+    // Загрузка данных из Firebase
+    async loadFromFirebase() {
+      await storeHelpers.loadDocsFromFirebase(this);
+    },
     // @TODO Очистка списка
   },
 });

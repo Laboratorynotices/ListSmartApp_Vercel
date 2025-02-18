@@ -43,6 +43,9 @@ import { useShoppingStore } from "@/stores/useShoppingStore";
 // Инициализируем store
 const store = useShoppingStore();
 
+// Загружаем данные из Firebase
+await store.loadFromFirebase();
+
 // Состояние для нового элемента
 const newItem = ref({
   name: "",
