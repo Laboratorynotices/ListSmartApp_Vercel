@@ -227,7 +227,7 @@ export const useShoppingStore = defineStore("shopping", {
     },
     // @TODO Обновление существующего элемента
     // Переключение статуса выполнения
-    toggleComplete(itemId: string) {
+    async toggleComplete(itemId: string) {
       // Используем метод findIndex для поиска индекса элемента в массиве
       const item = this.items.find((item) => item.id === itemId);
       if (item) {
@@ -235,7 +235,7 @@ export const useShoppingStore = defineStore("shopping", {
         item.completed = !item.completed;
 
         // Сохраняем изменения в Firebase
-        storeHelpers.updateDocInFirebase(this, itemId, {
+        await storeHelpers.updateDocInFirebase(this, itemId, {
           completed: item.completed,
         });
       } else {
@@ -249,6 +249,21 @@ export const useShoppingStore = defineStore("shopping", {
     async loadFromFirebase() {
       await storeHelpers.loadDocsFromFirebase(this);
     },
-    // @TODO Очистка списка
+    // Очистка списка
+    clearCompleted() {
+      // Отдельно сохраняем элементы, которые надо удалить
+      const itemsToDelete: ShoppingItem[] = this.items.filter(
+        (item) => item.completed
+      );
+
+      // Удаляем все элементы, которые были отмечены как завершенные
+      this.items = this.items.filter((item) => !item.completed);
+
+      // Проходимся по всем элементам, которые нужно удалить,...
+      itemsToDelete.forEach((item) => {
+        // ... и удаляем их из базы данных
+        storeHelpers.deleteDocFromFirebase(this, item.id as string);
+      });
+    },
   },
 });
