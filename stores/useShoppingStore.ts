@@ -45,15 +45,32 @@ const COLLECTION_NAME_SUFIX: string = "/shoppingItems";
  * Вспомогательные (приватные) методы для работы с Firebase
  */
 const storeHelpers = {
+  // Функция для получения доступа к базе данных и текущего пользователя
+  _getDbAndUser() {
+    // Получаем доступ к базе данных через VueFire
+    const db: ReturnType<typeof useFirestore> = useFirestore();
+
+    // Получаем текущего пользователя
+    const user: ReturnType<typeof useCurrentUser> = useCurrentUser();
+
+    return { db, user };
+  },
+
+  /**
+   * Получение полного имени коллекции в Firebase.
+   * @param user текущий пользователь
+   * @returns string полное имя коллекции
+   */
+  _getFullCollectionName(user: ReturnType<typeof useCurrentUser>) {
+    return COLLECTION_NAME_PREFIX + user.value?.uid + COLLECTION_NAME_SUFIX;
+  },
+
   // Сохранение данных в Firebase
   async addDocToFirebase(
     item: Omit<ShoppingItem, "id">
   ): Promise<DocumentData> {
-    // Получаем доступ к базе данных через VueFire
-    const db = useFirestore();
-
-    // Получаем текущего пользователя
-    const user = useCurrentUser();
+    // Доступ к базе данных и текущего пользователя
+    const { db, user } = this._getDbAndUser();
 
     try {
       // Добавляем элемент в базу данных
@@ -62,10 +79,7 @@ const storeHelpers = {
         // авторизация и указание на "коллекцию"
         // Указывая ID пользователя в пути позволит нам разделить данные между пользователями
         // Путь к коллекции должен состоять из нечётного количества частей. (users/{uid}/shoppingItems)
-        collection(
-          db,
-          COLLECTION_NAME_PREFIX + user.value?.uid + COLLECTION_NAME_SUFIX
-        ),
+        collection(db, this._getFullCollectionName(user)),
         // данные для добавления
         item
       );
@@ -77,22 +91,14 @@ const storeHelpers = {
 
   // Загрузка данных из Firebase
   async loadDocsFromFirebase(store: ReturnType<typeof useShoppingStore>) {
-    // Получаем доступ к базе данных через VueFire
-    const db = useFirestore();
-
-    // Получаем текущего пользователя
-    const user = useCurrentUser();
+    // Доступ к базе данных и текущего пользователя
+    const { db, user } = this._getDbAndUser();
 
     try {
       // Делаем из полученных данных массив и приводим к формату списка ShoppingItem
       // В пути указываем ID пользователя, чтобы получить данные только этого пользователя
       store.items = (
-        await getDocs(
-          collection(
-            db,
-            COLLECTION_NAME_PREFIX + user.value?.uid + COLLECTION_NAME_SUFIX
-          )
-        )
+        await getDocs(collection(db, this._getFullCollectionName(user)))
       ).docs.map((doc) => ({
         ...(doc.data() as ShoppingItem),
         id: doc.id,
@@ -112,28 +118,19 @@ const storeHelpers = {
     store: ReturnType<typeof useShoppingStore>,
     id: string
   ): Promise<void> {
-    // Получаем доступ к базе данных через VueFire
-    const db = useFirestore();
-
-    // Получаем текущего пользователя
-    const user = useCurrentUser();
+    // Доступ к базе данных и текущего пользователя
+    const { db, user } = this._getDbAndUser();
 
     try {
       // Получаем указатель на элемент, который нужно удалить
-      const docRef = doc(
-        db,
-        COLLECTION_NAME_PREFIX + user.value?.uid + COLLECTION_NAME_SUFIX,
-        id
-      );
+      const docRef = doc(db, this._getFullCollectionName(user), id);
 
       // Удаляем элемент из базы данных
       await deleteDoc(docRef);
     } catch (e) {
       store.error = "Ошибка при удалении элемента";
       console.error(
-        `Ошибка при удалении ${
-          COLLECTION_NAME_PREFIX + user.value?.uid + COLLECTION_NAME_SUFIX
-        }:`,
+        `Ошибка при удалении ${this._getFullCollectionName(user)}:`,
         e
       );
     }
@@ -181,7 +178,7 @@ export const useShoppingStore = defineStore("shopping", {
       this.items.push({ id: docRef.id, ...newItem });
     },
     // Удаление элемента из списка
-    removeItem(itemId: string) {
+    async removeItem(itemId: string) {
       // Используем метод findIndex для поиска индекса элемента в массиве по его id
       const index = this.items.findIndex((item) => item.id === itemId);
       if (index > -1) {
@@ -190,7 +187,7 @@ export const useShoppingStore = defineStore("shopping", {
         this.items.splice(index, 1);
 
         // Удаляем элемент из базы данных
-        storeHelpers.deleteDocFromFirebase(this, itemId);
+        await storeHelpers.deleteDocFromFirebase(this, itemId);
       } else {
         // Если элемент не найден, выводим сообщение об ошибке
         console.log("Элемент не найден");
