@@ -18,6 +18,12 @@
         :class="{ 'bg-gray-100': item.completed }"
       >
         <div class="flex-grow">
+          <input
+            type="checkbox"
+            :checked="item.completed"
+            @change="store.toggleComplete(item.id)"
+            class="mr-3"
+          />
           <div :class="{ 'line-through text-gray-500': item.completed }">
             {{ item.name }}
           </div>
