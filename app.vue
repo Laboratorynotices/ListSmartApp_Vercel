@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import nuxtConfig from "./nuxt.config";
+
 // Получаем текущего пользователя
 const user = useCurrentUser();
 
@@ -45,6 +47,17 @@ const logoutAuth = () => {
         <nuxt-link :to="{ name: 'ShoppingListCSR' }"
           >Список покупок (CSR)</nuxt-link
         >
+      </li>
+      <li>
+        <nuxt-link :to="{ name: 'ShoppingListSSR' }"
+          >Список покупок (SSR)</nuxt-link
+        >
+        -
+        <a href="/api/shopping-lists">API</a>
+        -
+        <a href="/api/me">me</a>
+        -
+        <nuxt-link to="/api/auth">auth</nuxt-link>
       </li>
     </ul>
   </div>
