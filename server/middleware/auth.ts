@@ -29,8 +29,8 @@ export default defineEventHandler(async (event) => {
     event.context.user = {
       uid: decodedClaims.uid, // UID пользователя
       email: decodedClaims.email, // Email пользователя
-      displayName: decodedClaims.displayName, // Имя пользователя
-      photoURL: decodedClaims.photoURL, // URL аватара пользователя
+      name: decodedClaims.name, // Имя пользователя
+      picture: decodedClaims.picture, // URL аватара пользователя
     };
   } catch (error) {
     // В случае ошибки (например, недействительный токен) считаем пользователя неавторизованным

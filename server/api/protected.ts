@@ -6,7 +6,7 @@ export default defineEventHandler((event) => {
   }
 
   return {
-    message: `Hello, ${event.context.user.displayName}!`,
+    message: `Hello, ${event.context.user.name}!`,
     uid: event.context.user.uid,
   };
 });
