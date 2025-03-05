@@ -1,7 +1,9 @@
 import { adminAuth } from "@/server/utils/firebaseAdmin";
 
 export default defineEventHandler(async (event) => {
-  const cookie = getCookie(event, "__session");
+  const config = useRuntimeConfig();
+  const cookieName = config.private.sessionCookieName;
+  const cookie = getCookie(event, cookieName);
 
   if (!cookie) return null;
 
