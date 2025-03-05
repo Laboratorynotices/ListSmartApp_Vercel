@@ -1,42 +1,27 @@
 import { defineEventHandler } from "h3";
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { useRuntimeConfig } from "#imports";
+import { collection, getDocs } from "firebase/firestore";
+import { getDb } from "@/server/utils/firebase";
 
 export default defineEventHandler(async () => {
   try {
-    // Получаем конфиг Firebase из nuxt.config.ts
-    const config = useRuntimeConfig();
-
-    // Инициализируем Firebase вручную
-    const firebaseApp = initializeApp(config.public.vuefire.config);
-
     // Получаем Firestore
-    const db = getFirestore(firebaseApp);
+    const db = getDb();
 
-    // Получаем коллекцию пользователей
-    const usersCollection = collection(
+    const shoppingItemsCollection = collection(
       db,
       "users/B1rXCvfUcSWwp9YlR07XcboQEHj2/shoppingItems"
     );
-
     // Читаем данные из Firestore
-    const snapshot = await getDocs(usersCollection);
+    const snapshot = await getDocs(shoppingItemsCollection);
 
-    // Формируем массив пользователей
-    const users = snapshot.docs.map((doc) => ({
+    // Формируем массив данных
+    const shoppingItems = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
 
-    return {
-      success: true,
-      data: users,
-    };
+    return { success: true, data: shoppingItems };
   } catch (error) {
-    return {
-      success: false,
-      error: error,
-    };
+    return { success: false, error: error };
   }
 });

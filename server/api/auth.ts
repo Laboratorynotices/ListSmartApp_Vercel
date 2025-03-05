@@ -1,4 +1,4 @@
-import { adminAuth } from "~/server/utils/firebaseAdmin";
+import { adminAuth } from "@/server/utils/firebaseAdmin";
 
 export default defineEventHandler(async (event) => {
   const cookie = getCookie(event, "__session");
