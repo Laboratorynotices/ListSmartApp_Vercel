@@ -29,6 +29,12 @@ interface ShoppingState {
   error: string | null;
 }
 
+// Интерфейс для ответа от сервера
+interface ShoppingItemResponse {
+  success: boolean;
+  data: ShoppingItem[];
+}
+
 /**
  * Данный код выполняется при инициализации хранилища,
  * когда пользователь ещё не авторизован.
@@ -104,6 +110,18 @@ const storeHelpers = {
         ...(doc.data() as ShoppingItem),
         id: doc.id,
       }));
+    } catch (e) {
+      store.error = "Ошибка при загрузке данных";
+      console.error("Ошибка при загрузке из Firebase:", e);
+    }
+  },
+
+  // Загрузка данных из Firebase для SSR
+  async loadDocsFromFirebaseSSR(store: ReturnType<typeof useShoppingStore>) {
+    try {
+      const response: ShoppingItemResponse = await $fetch("/api/shopping-list");
+
+      store.items = response.data;
     } catch (e) {
       store.error = "Ошибка при загрузке данных";
       console.error("Ошибка при загрузке из Firebase:", e);
@@ -253,6 +271,10 @@ export const useShoppingStore = defineStore("shopping", {
     // Загрузка данных из Firebase
     async loadFromFirebase() {
       await storeHelpers.loadDocsFromFirebase(this);
+    },
+    // Загрузка данных из Firebase для SSR
+    async loadFromFirebaseSSR() {
+      await storeHelpers.loadDocsFromFirebaseSSR(this);
     },
     // Очистка списка
     clearCompleted() {
