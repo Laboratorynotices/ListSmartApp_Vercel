@@ -19,4 +19,9 @@ export default defineNuxtConfig({
       appId: process.env.NUXT_PUBLIC_GOOGLE_FIREBASE_CONFIG_APP_ID,
     },
   },
+  runtimeConfig: {
+    private: {
+      sessionCookieName: "__session",
+    },
+  },
 });

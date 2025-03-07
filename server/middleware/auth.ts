@@ -10,8 +10,12 @@ import { adminAuth } from "@/server/utils/firebaseAdmin";
  */
 export default defineEventHandler(async (event) => {
   try {
+    // Получаем конфигурацию приложения
+    const config = useRuntimeConfig();
+    // Получаем имя куки
+    const cookieName = config.private.sessionCookieName;
     // Получаем значение сессионных куки, в которых хранится Firebase токен
-    const sessionCookie = getCookie(event, "__session");
+    const sessionCookie = getCookie(event, cookieName);
 
     // Если куки отсутствуют, пользователь считается неавторизованным
     if (!sessionCookie) {
