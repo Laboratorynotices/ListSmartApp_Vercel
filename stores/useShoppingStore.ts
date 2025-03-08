@@ -96,6 +96,29 @@ const storeHelpers = {
     }
   },
 
+  // Сохранение данных в Firebase для SSR
+  async addDocToFirebaseSSR(
+    item: Omit<ShoppingItem, "id">
+  ): Promise<DocumentData> {
+    try {
+      // Отправляем POST-запрос с новым элементом
+      const response: any = await $fetch("/api/shopping-list/create", {
+        method: "POST",
+        body: { item },
+      });
+
+      // Если запрос неуспешен, возвращаем пустой объект
+      if (!response?.success) {
+        return { id: undefined };
+      }
+
+      return response?.item;
+    } catch (e) {
+      console.error("Ошибка при добавлении shoppingItem: ", e);
+      return { id: undefined };
+    }
+  },
+
   // Загрузка данных из Firebase
   async loadDocsFromFirebase(store: ReturnType<typeof useShoppingStore>) {
     // Доступ к базе данных и текущего пользователя
@@ -227,6 +250,22 @@ export const useShoppingStore = defineStore("shopping", {
       // Добавляем элемент в базу данных, получаем ID
       // В первый раз ещё и создаст "коллекцию"
       const docRef = await storeHelpers.addDocToFirebase(newItem);
+
+      // Добавляем элемент в список, добавляя ему ID
+      this.items.push({ id: docRef.id, ...newItem });
+    },
+    // Добавление нового элемента в список для SSR
+    async addItemSSR(item: Omit<ShoppingItem, "id" | "createdAt">) {
+      // @TODO проверить есть ли элемент с таким именем
+      // Создаём новый элемент
+      const newItem: Omit<ShoppingItem, "id"> = {
+        createdAt: new Date(),
+        ...item,
+      };
+
+      // Добавляем элемент в базу данных, получаем ID
+      // В первый раз ещё и создаст "коллекцию"
+      const docRef = await storeHelpers.addDocToFirebaseSSR(newItem);
 
       // Добавляем элемент в список, добавляя ему ID
       this.items.push({ id: docRef.id, ...newItem });
