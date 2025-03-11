@@ -46,6 +46,11 @@ const logoutAuth = () => {
           >Список покупок (CSR)</nuxt-link
         >
       </li>
+      <li>
+        <nuxt-link :to="{ name: 'ShoppingListSSR' }"
+          >Список покупок (SSR)</nuxt-link
+        >
+      </li>
     </ul>
   </div>
 </template>
