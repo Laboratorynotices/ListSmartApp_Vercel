@@ -1,4 +1,3 @@
-import { defineEventHandler } from "h3";
 import { collection, getDocs } from "firebase/firestore";
 import { getDb } from "@/server/utils/firebase";
 import getUserUid from "@/server/utils/getUserUid";
