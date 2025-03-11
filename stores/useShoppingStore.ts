@@ -179,6 +179,30 @@ const storeHelpers = {
   },
 
   /**
+   * Удаление элемента из Firebase для SSR.
+   * @param store контекст хранилища
+   * @param id идентификатор элемента для удаления
+   */
+  async deleteDocFromFirebaseSSR(
+    store: ReturnType<typeof useShoppingStore>,
+    id: string
+  ): Promise<void> {
+    try {
+      const response = await fetch(`/api/shopping-list/delete?id=${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Ошибка при удалении");
+      }
+    } catch (e) {
+      store.error = "Ошибка при удалении элемента";
+      console.error(`Ошибка при удалении элемента ${id}:`, e);
+    }
+  },
+
+  /**
    * Обновление элемента в Firebase.
    * @param store контекст хранилища
    * @param id идентификатор элемента для обновления
@@ -281,6 +305,23 @@ export const useShoppingStore = defineStore("shopping", {
 
         // Удаляем элемент из базы данных
         await storeHelpers.deleteDocFromFirebase(this, itemId);
+      } else {
+        // Если элемент не найден, выводим сообщение об ошибке
+        console.log("Элемент не найден");
+        this.error = "Элемент не найден";
+      }
+    },
+    // Удаление элемента из списка для SSR
+    async removeItemSSR(itemId: string) {
+      // Используем метод findIndex для поиска индекса элемента в массиве по его id
+      const index = this.items.findIndex((item) => item.id === itemId);
+      if (index > -1) {
+        // Если элемент найден (индекс больше -1),
+        // используем метод splice для удаления одного элемента начиная с найденного индекса
+        this.items.splice(index, 1);
+
+        // Удаляем элемент из базы данных
+        await storeHelpers.deleteDocFromFirebaseSSR(this, itemId);
       } else {
         // Если элемент не найден, выводим сообщение об ошибке
         console.log("Элемент не найден");
