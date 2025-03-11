@@ -231,6 +231,33 @@ const storeHelpers = {
       );
     }
   },
+
+  /**
+   * Обновление элемента в Firebase для SSR.
+   * @param store контекст хранилища
+   * @param id идентификатор элемента для обновления
+   * @param item данные для обновления
+   * @returns Promise<void>
+   */
+  async updateDocInFirebaseSSR(
+    store: ReturnType<typeof useShoppingStore>,
+    id: string,
+    item: Partial<Omit<ShoppingItem, "id" | "createdAt">>
+  ): Promise<void> {
+    try {
+      const response: ShoppingItemResponse = await $fetch("/api/updateItem", {
+        method: "PATCH",
+        body: { id, item },
+      });
+
+      if (!response.success) {
+        throw new Error("Ошибка при обновлении элемента.");
+      }
+    } catch (e) {
+      store.error = "Ошибка при обновлении элемента.";
+      console.error("Ошибка при обновлении элемента: ", e);
+    }
+  },
 };
 
 // Создаём store с использованием Composition API стиля
@@ -347,6 +374,27 @@ export const useShoppingStore = defineStore("shopping", {
         this.error = "Элемент не найден";
       }
     },
+    // @TODO Обновление существующего элемента
+    // Переключение статуса выполнения
+    async toggleCompleteSSR(itemId: string) {
+      // Используем метод findIndex для поиска индекса элемента в массиве
+      const item = this.items.find((item) => item.id === itemId);
+      if (!item) {
+        // Если элемент не найден, выводим сообщение об ошибке
+        console.log("Элемент не найден");
+        this.error = "Элемент не найден";
+        // Прерываем выполнение метода
+        return;
+      }
+
+      // Переключаем его статус элемента
+      item.completed = !item.completed;
+
+      // Сохраняем изменения в Firebase через SSR
+      await storeHelpers.updateDocInFirebaseSSR(this, itemId, {
+        completed: item.completed,
+      });
+    },
     // @TODO Добавление новой категории
     // Загрузка данных из Firebase
     async loadFromFirebase() {
@@ -370,6 +418,22 @@ export const useShoppingStore = defineStore("shopping", {
       itemsToDelete.forEach((item) => {
         // ... и удаляем их из базы данных
         storeHelpers.deleteDocFromFirebase(this, item.id as string);
+      });
+    },
+    // Очистка списка
+    clearCompletedSSR() {
+      // Отдельно сохраняем элементы, которые надо удалить
+      const itemsToDelete: ShoppingItem[] = this.items.filter(
+        (item) => item.completed
+      );
+
+      // Удаляем все элементы, которые были отмечены как завершенные
+      this.items = this.items.filter((item) => !item.completed);
+
+      // Проходимся по всем элементам, которые нужно удалить,...
+      itemsToDelete.forEach((item) => {
+        // ... и удаляем их из базы данных
+        storeHelpers.deleteDocFromFirebaseSSR(this, item.id as string);
       });
     },
   },
